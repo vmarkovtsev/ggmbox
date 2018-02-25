@@ -1,0 +1,27 @@
+version: "{build}"
+platform: x64
+image: Visual Studio 2017
+
+clone_folder: c:\gopath\src\github.com\vmarkovtsev\ggmbox
+
+environment:
+  GOPATH: c:\gopath
+
+build_script:
+  - go get -v github.com\vmarkovtsev\ggmbox
+  - rename %GOPATH%\bin\ggmbox.exe parse.exe
+  - 7z a c:\gopath\src\github.com\vmarkovtsev\ggmbox\parse.win64.zip %GOPATH%\bin\parse.exe
+
+artifacts:
+  - name: parse.win64.zip
+    path: parse.win64.zip
+
+deploy:
+  release: $(APPVEYOR_REPO_TAG_NAME)
+  provider: GitHub
+  auth_token:
+    secure: TUwdGVFtdk9XGWfa7IMBpMSl7TnxUID5ifdpf4jlbS14DCOIDKK3+CeaL31y6PU8
+  artifact: parse.win64.zip
+  on:
+    branch: master
+    appveyor_repo_tag: true

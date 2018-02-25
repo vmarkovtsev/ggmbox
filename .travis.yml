@@ -1,0 +1,55 @@
+sudo: false
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+  - "$HOME/go/src"
+_python_install: &_python_install
+  - pip install --upgrade pip
+  - pip install scrapy codecov
+_python_test: &_python_test
+  - SCRIPT="coverage run --concurrency=multiprocessing -m unittest discover && coverage combine"
+_go_before_install: &_go_before_install
+  - go get -v golang.org/x/lint/golint
+_go_install: &_go_install
+  - go get ./...
+_go_test: &_go_test
+  - SCRIPT="go vet ./... &&
+            golint -set_exit_status ./... &&
+            go test -v -cpu=1,2 -coverprofile=coverage.txt -covermode=count github.com/vmarkovtsev/ggmbox"
+matrix:
+  include:
+    - language: go
+      go: 1.8
+      before_install: *_go_before_install
+      install: *_go_install
+      env: *_go_test
+    - language: go
+      go: 1.9
+      before_install: *_go_before_install
+      install: *_go_install
+      env: *_go_test
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+    - language: python
+      python: 3.4
+      env: *_python_test
+      install: *_python_install
+    - language: python
+      python: 3.5
+      env: *_python_test
+      install: *_python_install
+    - language: python
+      python: 3.6
+      env: SCRIPT="pycodestyle --max-line-length=99 ."
+      install: pip install pycodestyle
+    - language: python
+      python: 3.6
+      env: *_python_test
+      install: *_python_install
+      after_success:
+        - codecov
+  fast_finish: true
+script:
+  - (eval "$SCRIPT")
+notifications:
+  email: false
