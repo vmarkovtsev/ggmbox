@@ -17,7 +17,6 @@ import (
 
 	"github.com/araddon/dateparse"
 	"github.com/jhillyerd/enmime"
-	"time"
 )
 
 const (
@@ -134,22 +133,6 @@ func readEnvelope(path string) (*enmime.Envelope, error) {
 	return env, nil
 }
 
-func parseDate(val string) (time.Time, error) {
-	res, err := dateparse.ParseAny(val)
-	if err == nil {
-		return res, nil
-	}
-	res, err = time.Parse("2 Jan 2006 15:04:05 -0700", val)
-	if err == nil {
-		return res, nil
-	}
-	res, err = time.Parse("2 Jan 2006 15:04:05 MST", val)
-	if err == nil {
-		return res, nil
-	}
-	return time.Time{}, err
-}
-
 func writePlainTextTopics(archive map[string][]*enmime.Envelope) {
 	fmt.Println("topic_id,text")
 	writer := csv.NewWriter(os.Stdout)
@@ -168,11 +151,11 @@ func writePlainTextTopics(archive map[string][]*enmime.Envelope) {
 		envs := archive[key]
 		seq[0] = key
 		sort.Slice(envs, func(i, j int) bool {
-			time1, err := parseDate(envs[i].GetHeader("Date"))
+			time1, err := dateparse.ParseAny(envs[i].GetHeader("Date"))
 			if err != nil {
 				panic(err)
 			}
-			time2, err := parseDate(envs[j].GetHeader("Date"))
+			time2, err := dateparse.ParseAny(envs[j].GetHeader("Date"))
 			if err != nil {
 				panic(err)
 			}
