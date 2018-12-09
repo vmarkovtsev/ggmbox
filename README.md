@@ -36,6 +36,12 @@ scrapy runspider -a name=golang-nuts -o result.json -t json ggmbox.py
 Replace "golang-nuts" with the actual group name. The raw emails will be saved by default to the
 corresponding directory.
 
+```
+scrapy runspider -a name=chromium-dev -a prefix=a/chromium.org -t json ggmbox.py
+```
+
+Note the usage of "prefix" argument - it sets the name of the parent. Some groups require that.
+
 #### Parser
 
 ```

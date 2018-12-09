@@ -17,7 +17,7 @@ class GoogleGroupMBoxSpider(scrapy.Spider):
     name = "ggmbox"
 
     def __init__(self, name: str, template="{topic}/{index:03d}_{message}.email", output="{name}",
-                 root="https://groups.google.com", **kwargs):
+                 root="https://groups.google.com", prefix="", **kwargs):
         """
         Initializes a new instance of GoogleGroupMBoxSpider class.
 
@@ -36,12 +36,15 @@ class GoogleGroupMBoxSpider(scrapy.Spider):
         self.output = output.format(name=name)
         self.template = template
         self.root = root
-        self.start_urls = [root + "/forum/?_escaped_fragment_=forum/" + name]
+        if not prefix.endswith("/"):
+            prefix += "/"
+        self.prefix = prefix + "forum"
+        self.start_urls = ["%s/%s/?_escaped_fragment_=forum/%s" % (self.root, self.prefix, name)]
 
     def parse(self, response: scrapy.http.response.html.HtmlResponse):
         for topic in response.css("tr a::attr(href)"):
-            topic_url = "%s/forum/?_escaped_fragment_=topic/%s/%s" % (
-                self.root, self.name, self.last_part(topic.extract()))
+            topic_url = "%s/%s/?_escaped_fragment_=topic/%s/%s" % (
+                self.root, self.prefix, self.name, self.last_part(topic.extract()))
             yield response.follow(topic_url, self.parse_topic)
 
         for next_page in response.css("body > a"):
@@ -69,7 +72,7 @@ class GoogleGroupMBoxSpider(scrapy.Spider):
                 self.log("Skipped %s/%s - already fetched" % (topic_id, message_id))
                 continue
             yield response.follow(
-                "%s/forum/message/raw?msg=%s/%s/%s" % (self.root, self.name, topic_id, message_id),
+                "%s/%s/message/raw?msg=%s/%s/%s" % (self.root, self.prefix, self.name, topic_id, message_id),
                 functools.partial(self.save_email, file_name=file_name))
         yield {"topic": response.css("h2 ::text").extract_first(),
                "id": topic_id,
