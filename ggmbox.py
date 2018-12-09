@@ -54,8 +54,10 @@ class GoogleGroupMBoxSpider(scrapy.Spider):
         messages = []
         topic_id = self.last_part(response.url)
         for i, message in enumerate(response.css("tr")):
-            message_id = self.last_part(
-                message.css("td[class=subject] > a::attr(href)").extract_first())
+            topic_url = message.css("td[class=subject] > a::attr(href)").extract_first()
+            if topic_url is None:
+                continue
+            message_id = self.last_part(topic_url)
             messages.append({
                 "id": message_id,
                 "author": message.css("td[class=author] ::text").extract_first(),
