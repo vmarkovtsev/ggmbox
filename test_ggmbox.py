@@ -36,7 +36,7 @@ class GGMBoxTests(unittest.TestCase):
                 files_fetched = True
                 files.sort()
                 self.assertGreater(len(files), 0)
-                re.match("\d{3}_", files[0][:4])
+                re.match(r"\d{3}_", files[0][:4])
                 self.assertEqual(files[0][-6:], ".email")
                 self.assertGreater(
                     os.path.getsize(os.path.join(self.tempdir, dirname, files[0])), 0)

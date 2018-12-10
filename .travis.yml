@@ -5,7 +5,7 @@ cache:
   - "$HOME/go/src"
 _python_install: &_python_install
   - pip install --upgrade pip
-  - pip install scrapy codecov
+  - pip install --upgrade scrapy codecov
 _python_test: &_python_test
   - SCRIPT="coverage run --concurrency=multiprocessing -m unittest discover && coverage combine"
 _go_before_install: &_go_before_install
@@ -19,12 +19,17 @@ _go_test: &_go_test
 matrix:
   include:
     - language: go
-      go: 1.8
+      go: 1.9
       before_install: *_go_before_install
       install: *_go_install
       env: *_go_test
     - language: go
-      go: 1.9
+      go: 1.10.4
+      before_install: *_go_before_install
+      install: *_go_install
+      env: *_go_test
+    - language: go
+      go: 1.11
       before_install: *_go_before_install
       install: *_go_install
       env: *_go_test

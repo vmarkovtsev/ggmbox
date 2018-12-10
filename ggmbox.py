@@ -72,7 +72,8 @@ class GoogleGroupMBoxSpider(scrapy.Spider):
                 self.log("Skipped %s/%s - already fetched" % (topic_id, message_id))
                 continue
             yield response.follow(
-                "%s/%s/message/raw?msg=%s/%s/%s" % (self.root, self.prefix, self.name, topic_id, message_id),
+                "%s/%s/message/raw?msg=%s/%s/%s" % (self.root, self.prefix, self.name,
+                                                    topic_id, message_id),
                 functools.partial(self.save_email, file_name=file_name))
         yield {"topic": response.css("h2 ::text").extract_first(),
                "id": topic_id,
